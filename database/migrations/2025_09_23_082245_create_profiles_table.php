@@ -18,7 +18,7 @@ return new class extends Migration
         $table->foreignId('user_id')->constrained()->cascadeOnDelete();
         $table->string('no_hp')->nullable();
         $table->enum('jenis_kelamin',['L','P'])->nullable();
-        $table->string('foto')->nullable()->default('default.png');
+        $table->string('foto')->nullable()->default('default.jpg');
         $table->text('bio')->nullable();
         $table->string('address')->nullable();
         $table->timestamps();

@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -33,20 +34,58 @@ class ProfileController extends Controller
      * Update profile.
      * Jika Anda tidak menggunakan ProfileUpdateRequest, ganti tipenya ke Request dan lakukan validasi manual.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $user = $request->user();
+    public function update(Request $request): RedirectResponse
+{
+    $user = $request->user();
 
-        $user->fill($request->validated());
+    $request->validate([
+        'name'   => ['required','string','max:255'],
+        'email'  => ['required','email','max:255'],
+        'phone'  => ['nullable','string','max:50'],
+        'gender' => ['nullable','in:L,P'],
+        'address'=> ['nullable','string','max:255'],
+        'bio'    => ['nullable','string'],
+        'foto'   => ['nullable','image','mimes:jpg,jpeg,png','max:2048'],
+    ]);
 
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+    // Update users table
+    $user->name  = $request->name;
+    $user->email = $request->email;
+    $user->save();
+
+    // Pastikan profile ada
+    $profile = $user->profile()->firstOrCreate([]);
+
+    // Update profile fields
+    $profile->no_hp         = $request->phone;
+    $profile->jenis_kelamin = $request->gender;
+    $profile->address       = $request->address;
+    $profile->bio           = $request->bio;
+
+    // Handle foto (opsional)
+    if ($request->hasFile('foto')) {
+        $file = $request->file('foto');
+
+        // Hapus foto lama jika ada dan bukan default
+        if ($profile->foto && $profile->foto !== 'default.jpg') {
+            $oldPath = public_path('images/profile/'.$profile->foto);
+            if (file_exists($oldPath)) {
+                @unlink($oldPath);
+            }
         }
 
-        $user->save();
+        // Simpan foto baru ke public/images/profile
+        $filename = uniqid().'_'.$user->id.'.'.$file->getClientOriginalExtension();
+        $file->move(public_path('images/profile'), $filename);
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        $profile->foto = $filename;
     }
+
+    $profile->save();
+
+    return Redirect::route('profile.show')->with('status', 'Profile berhasil diperbarui');
+}
+
 
     /**
      * Hapus akun.
@@ -68,5 +107,6 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
-    
+
+   
 }

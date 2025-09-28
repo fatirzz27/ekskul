@@ -23,7 +23,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::post('/profile/update-photo', [ProfileController::class, 'updatePhoto'])->name('profile.updatePhoto');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

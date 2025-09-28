@@ -44,6 +44,10 @@ class RegisteredUserController extends Controller
         'role' => 'siswa', // default null, nanti diubah manual di DB
     ]);
 
+    Profile::create([
+        'user_id' => $user->id,
+    ]);
+
     Auth::login($user);
 
     return redirect()->route('dashboard');
