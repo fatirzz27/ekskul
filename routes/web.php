@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EkskulController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,6 +21,7 @@ Route::get('/', function () {
 // Dashboard & profile hanya untuk user yang sudah login
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/ekskul', [EkskulController::class, 'index'])->name('ekskul.index');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
