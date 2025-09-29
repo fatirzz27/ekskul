@@ -64,4 +64,12 @@ class User extends Authenticatable
     {
         return $this->role === 'siswa';
     }
+
+    /**
+     * Relasi many-to-many ke ekskul yang diikuti user (anggota).
+     */
+    public function ekskuls()
+    {
+        return $this->belongsToMany(Ekskul::class)->withTimestamps();
+    }
 }
