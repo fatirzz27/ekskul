@@ -8,7 +8,7 @@
                     <img src="{{ asset('images/ekskul/' . $ekskul->foto) }}" class="card-img-top" alt="{{ $ekskul->nama }}">
                     <div class="card-body">
                         <h5 class="card-title">{{ $ekskul->nama }}</h5>
-                        <p class="card-text">{{ $ekskul->deskripsi }}</p>
+                        <p class="card-text">{{ Str::limit($ekskul->deskripsi ?? 'Tidak ada deskripsi', 100, '...') }}</p>
                         <a href="{{ route('ekskul.show', $ekskul->id) }}" class="btn btn-primary">Lihat Detail</a>
                     </div>
                 </div>
