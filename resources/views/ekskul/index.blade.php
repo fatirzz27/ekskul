@@ -67,13 +67,9 @@
                   <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning flex-fill rounded-0">
                     <i class="bi bi-pencil"></i>
                   </a>
-                  <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST" class="flex-fill" onsubmit="return confirm('Yakin ingin menghapus ekskul ini?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger w-100 rounded-0">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </form>
+                  <button type="button" class="btn btn-danger flex-fill rounded-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $ekskul->id }}">
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
               @endif
             @endauth
@@ -90,6 +86,37 @@
     @endforelse
   </div>
 
+  <!-- Delete Confirmation Modals -->
+  @foreach($ekskuls as $ekskul)
+    <div class="modal fade" id="deleteModal{{ $ekskul->id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ $ekskul->id }}" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-body text-center p-5">
+            <div class="mb-4">
+              <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle" style="width: 80px; height: 80px;">
+                <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2.5rem;"></i>
+              </div>
+            </div>
+            <h4 class="modal-title fw-bold mb-3" id="deleteModalLabel{{ $ekskul->id }}">Are you sure to delete this?</h4>
+            <p class="text-muted mb-4">This action cannot be undone. The ekskul "{{ $ekskul->nama_ekskul }}" will be permanently deleted.</p>
+            <div class="d-flex gap-3 justify-content-center">
+              <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST" class="d-inline">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+                  <i class="bi bi-trash me-2"></i>Delete
+                </button>
+              </form>
+              <button type="button" class="btn btn-secondary px-4 py-2 fw-semibold" data-bs-dismiss="modal">
+                <i class="bi bi-arrow-left me-2"></i>Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  @endforeach
+
   <!-- Pagination -->
   @if($ekskuls->hasPages())
     <div class="d-flex justify-content-center mt-4">
@@ -99,6 +126,45 @@
 
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom Modal Styles -->
+  <style>
+    /* Custom Modal Styles */
+    .modal-content {
+      border-radius: 15px;
+      background: white;
+    }
+    
+    .modal-backdrop {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal .btn-danger {
+      background: #dc3545;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .modal .btn-danger:hover {
+      background: #c82333;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
+    
+    .modal .btn-secondary {
+      background: #6c757d;
+      border: none;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+    }
+    
+    .modal .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-1px);
+    }
+  </style>
 
 </body>
 </html>

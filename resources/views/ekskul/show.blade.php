@@ -72,16 +72,41 @@
           <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning">
             <i class="bi bi-pencil"></i> Edit
           </a>
-          <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus ekskul ini?')">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-danger">
-              <i class="bi bi-trash"></i> Hapus
-            </button>
-          </form>
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="bi bi-trash"></i> Hapus
+          </button>
         </div>
       @endif
     @endauth
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body text-center p-5">
+        <div class="mb-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle" style="width: 80px; height: 80px;">
+            <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2.5rem;"></i>
+          </div>
+        </div>
+        <h4 class="modal-title fw-bold mb-3" id="deleteModalLabel">Are you sure to delete this?</h4>
+        <p class="text-muted mb-4">This action cannot be undone. The ekskul "{{ $ekskul->nama_ekskul }}" will be permanently deleted.</p>
+        <div class="d-flex gap-3 justify-content-center">
+          <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold">
+              <i class="bi bi-trash me-2"></i>Delete
+            </button>
+          </form>
+          <button type="button" class="btn btn-secondary px-4 py-2 fw-semibold" data-bs-dismiss="modal">
+            <i class="bi bi-arrow-left me-2"></i>Cancel
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -93,6 +118,42 @@
   
   .content-container {
     width: 100%;
+  }
+  
+  /* Custom Modal Styles */
+  .modal-content {
+    border-radius: 15px;
+    background: white;
+  }
+  
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  #deleteModal .btn-danger {
+    background: #dc3545;
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  #deleteModal .btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  }
+  
+  #deleteModal .btn-secondary {
+    background: #6c757d;
+    border: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+  }
+  
+  #deleteModal .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
   }
 </style>
 @endsection
