@@ -62,7 +62,13 @@
             <div class="d-flex align-items-center">
                 <span class="text-white me-2">
                     <a href="{{ route('profile.show') }}" class="text-decoration-none text-white">
+                        @if(Auth::user()->role === 'admin')
+                        Hi, {{ Auth::user()->name }} (Admin)
+                        @elseif(Auth::user()->role === 'pembina')
+                        Hi, {{ Auth::user()->name }} (Pembina)
+                        @elseif(Auth::user()->role === 'siswa')
                         Hi, {{ Auth::user()->name }}
+                        @endif
                     </a>
                 </span>
                <img src="{{ asset('images/profile/' . (Auth::user()->profile->foto ?? 'default.jpg')) }}"
