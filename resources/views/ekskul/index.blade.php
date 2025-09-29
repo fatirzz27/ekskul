@@ -1,68 +1,105 @@
 @extends('layouts.master')
 
 @section('content')
-<div class="container">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Card Example</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="p-4">
 
-    {{-- Header + Tombol Create --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold">Daftar Ekskul</h4>
-        @if(Auth::user()->role === 'admin')
-            <a href="{{ route('ekskul.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> CREATE NEW
-            </a>
-        @endif
+  <!-- Success Message -->
+  @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ session('success') }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+  @endif
 
-    {{-- Layout Card --}}
-    <div class="row g-4">
-        @forelse($ekskuls as $item)
-            <div class="col-md-4">
-                <div class="card h-100 shadow-sm">
-                    {{-- Foto --}}
-                    <img src="{{ $item->foto_url ?? asset('images/ekskul/default.jpg') }}" 
-                         class="card-img-top" alt="Foto Ekskul">
+  <!-- Create New Button -->
+  <div class="mb-4">
+    <a href="{{ route('ekskul.create') }}" class="btn btn-primary">CREATE NEW</a>
+  </div>
 
-                    <div class="card-body d-flex flex-column">
-                        {{-- Judul --}}
-                        <h5 class="card-title">{{ $item->nama_ekskul }}</h5>
-                        {{-- Deskripsi --}}
-                        <p class="card-text text-muted">
-                            {{ \Illuminate\Support\Str::limit($item->deskripsi, 80) }}
-                        </p>
-
-                        {{-- Tombol Aksi --}}
-                        <div class="mt-auto d-flex justify-content-between align-items-center">
-                            <a href="{{ route('ekskul.show', $item->id) }}" class="btn btn-sm btn-primary">
-                                READ MORE
-                            </a>
-                            <div class="d-flex gap-2">
-                                @if(in_array(Auth::user()->role, ['admin','pembina']))
-                                    <a href="{{ route('ekskul.edit', $item->id) }}" class="btn btn-sm btn-warning text-white">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <form action="{{ route('ekskul.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Yakin hapus ekskul ini?')">
-                                        @csrf
-                                        @elseif(Auth::user()->role === 'admin')
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+  <!-- Card Row -->
+  <div class="row g-4">
+    @forelse($ekskuls as $ekskul)
+      <div class="col-md-4">
+        <div class="card">
+          <img src="{{ $ekskul->foto_url }}" class="card-img-top" alt="{{ $ekskul->nama_ekskul }}" style="height: 200px; object-fit: cover;">
+          <div class="card-body">
+            <h5 class="card-title">{{ $ekskul->nama_ekskul }}</h5>
+            <p class="card-text">
+              {{ Str::limit($ekskul->deskripsi ?? 'Tidak ada deskripsi', 100, '...') }}
+            </p>
+          </div>
+          <div class="card-footer p-0">
+            <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-primary w-100 rounded-0">READ MORE</a>
+            @auth
+              @php
+                $isSiswa = auth()->user()->role === 'siswa';
+                $isMember = $ekskul->anggota->contains(auth()->id());
+                $isEditor = in_array(auth()->user()->role, ['admin','pembina']);
+              @endphp
+              @if($isSiswa)
+                <div class="d-flex">
+                  @if(!$isMember)
+                    <form action="{{ route('ekskul.join', $ekskul) }}" method="POST" class="flex-fill">
+                      @csrf
+                      <button type="submit" class="btn btn-success w-100 rounded-0">
+                        <i class="bi bi-plus-circle"></i> Join
+                      </button>
+                    </form>
+                  @else
+                    <form action="{{ route('ekskul.leave', $ekskul) }}" method="POST" class="flex-fill">
+                      @csrf
+                      @method('DELETE')
+                      <button type="submit" class="btn btn-outline-danger w-100 rounded-0">
+                        <i class="bi bi-x-circle"></i> Leave
+                      </button>
+                    </form>
+                  @endif
                 </div>
-            </div>
-        @empty
-            <p class="text-muted">Belum ada ekskul tersedia.</p>
-        @endforelse
-    </div>
+              @elseif($isEditor)
+                <div class="d-flex">
+                  <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning flex-fill rounded-0">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST" class="flex-fill" onsubmit="return confirm('Yakin ingin menghapus ekskul ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger w-100 rounded-0">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              @endif
+            @endauth
+          </div>
+        </div>
+      </div>
+    @empty
+      <div class="col-12">
+        <div class="alert alert-info text-center">
+          <h5>Belum ada data ekskul</h5>
+          <p>Klik tombol "CREATE NEW" untuk menambahkan ekskul pertama.</p>
+        </div>
+      </div>
+    @endforelse
+  </div>
 
-    {{-- Pagination --}}
-    <div class="mt-4">
-        {{ $ekskuls->links() }}
+  <!-- Pagination -->
+  @if($ekskuls->hasPages())
+    <div class="d-flex justify-content-center mt-4">
+      {{ $ekskuls->links() }}
     </div>
+  @endif
 
-</div>
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+</body>
+</html>
 @endsection

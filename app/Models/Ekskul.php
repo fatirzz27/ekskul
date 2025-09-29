@@ -19,4 +19,12 @@ class Ekskul extends Model
     {
         return asset('images/ekskul/' . ($this->foto ?: 'default.jpg'));
     }
+
+    /**
+     * Anggota ekskul (users) many-to-many.
+     */
+    public function anggota()
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
 }

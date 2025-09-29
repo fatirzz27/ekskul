@@ -10,7 +10,7 @@ class EkskulController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth'); // semua method butuh login
+        $this->middleware('auth')->except(['index','show']);
     }
 
     private function authorizeEditor()
@@ -23,8 +23,15 @@ class EkskulController extends Controller
 
     public function index()
     {
-        $ekskuls = Ekskul::latest()->paginate(9);
+        $ekskuls = Ekskul::with('anggota')->latest()->paginate(9);
         return view('ekskul.index', compact('ekskuls'));
+    }
+
+    public function manage()
+    {
+        $this->authorizeEditor();
+        $ekskuls = Ekskul::latest()->paginate(9);
+        return view('ekskul.manage', compact('ekskuls'));
     }
 
     public function create()
@@ -61,7 +68,9 @@ class EkskulController extends Controller
 
     public function show(Ekskul $ekskul)
     {
-        return view('ekskul.show', compact('ekskul'));
+        $ekskul->load('anggota');
+        $isMember = auth()->check() ? $ekskul->anggota->contains(auth()->id()) : false;
+        return view('ekskul.show', compact('ekskul','isMember'));
     }
 
     public function edit(Ekskul $ekskul)
@@ -115,5 +124,33 @@ class EkskulController extends Controller
 
         $ekskul->delete();
         return redirect()->route('ekskul.index')->with('success','Ekskul dihapus.');
+    }
+
+    /**
+     * Siswa bergabung ke ekskul.
+     */
+    public function join(Ekskul $ekskul)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if(!$user->isSiswa()) {
+            return back()->with('error','Hanya siswa yang bisa bergabung.');
+        }
+        $ekskul->anggota()->syncWithoutDetaching([$user->id]);
+        return back()->with('success','Berhasil bergabung ke ekskul.');
+    }
+
+    /**
+     * Siswa keluar dari ekskul.
+     */
+    public function leave(Ekskul $ekskul)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if(!$user->isSiswa()) {
+            return back()->with('error','Hanya siswa yang bisa keluar sebagai anggota.');
+        }
+        $ekskul->anggota()->detach($user->id);
+        return back()->with('success','Anda telah keluar dari ekskul.');
     }
 }
