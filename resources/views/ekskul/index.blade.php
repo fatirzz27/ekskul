@@ -18,10 +18,14 @@
     </div>
   @endif
 
-  <!-- Create New Button -->
-  <div class="mb-4">
-    <a href="{{ route('ekskul.create') }}" class="btn btn-primary">CREATE NEW</a>
-  </div>
+  <!-- Create New Button - Hanya untuk admin/pembina yang login -->
+  @auth
+    @if(in_array(auth()->user()->role, ['admin','pembina']))
+      <div class="mb-4">
+        <a href="{{ route('ekskul.create') }}" class="btn btn-primary">CREATE NEW</a>
+      </div>
+    @endif
+  @endauth
 
   <!-- Card Row -->
   <div class="row g-4">
@@ -62,7 +66,7 @@
                     </form>
                   @endif
                 </div>
-              @elseif($isEditor)
+              @elseif($isPembina || $isAdmin)
                 <div class="d-flex">
                   <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning flex-fill rounded-0">
                     <i class="bi bi-pencil"></i>
