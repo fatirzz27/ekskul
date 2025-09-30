@@ -27,4 +27,10 @@ class Ekskul extends Model
     {
         return $this->belongsToMany(User::class)->withTimestamps();
     }
+
+    public function pembina()
+{
+    return $this->belongsToMany(User::class, 'pembina_ekskul', 'ekskul_id', 'user_id');
+}
+
 }
