@@ -5,10 +5,10 @@
         @foreach($ekskuls as $ekskul)
             <div class="col-md-4">
                 <div class="card shadow-sm mb-4">
-                    <img src="{{ asset('images/ekskul/' . $ekskul->foto) }}" class="card-img-top" alt="{{ $ekskul->nama }}">
+                    <img src="{{ asset('images/ekskul/' . $ekskul->foto) }}" class="card-img-top" alt="{{ $ekskul->nama_ekskul }}">
                     <div class="card-body">
-                        <h5 class="card-title">{{ $ekskul->nama }}</h5>
-                        <p class="card-text">{{ $ekskul->deskripsi }}</p>
+                        <h5 class="card-title">{{ $ekskul->nama_ekskul }}</h5>
+                        <p class="card-text">{{ Str::limit($ekskul->deskripsi ?? 'Tidak ada deskripsi', 100, '...') }}</p>
                         <a href="{{ route('ekskul.show', $ekskul->id) }}" class="btn btn-primary">Lihat Detail</a>
                     </div>
                 </div>
