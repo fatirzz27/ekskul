@@ -2,83 +2,63 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Models\Ekskul;
 
 class UserRoleController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return view('KelolaUser.tampil');
+        $users = User::all(); // fetch all users
+        return view('KelolaUser.tampil', compact('users'));
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified user's role.
      */
     public function update(Request $request, $id)
     {
-        //
+        $user = User::find($id);
+        $user->role = $request->input('role');
+        $user->save();
+
+        return redirect()->back()->with('success', 'User role updated!');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Remove the specified user.
      */
     public function destroy($id)
     {
-        //
+        $user = User::find($id);
+        $user->delete();
+
+        return redirect()->back()->with('success', 'User deleted!');
     }
+
+   public function editEkskul($id)
+{
+    $user = User::findOrFail($id);
+    $ekskuls = Ekskul::all(); // semua ekskul
+
+    return view('KelolaUser.edit', compact('user', 'ekskuls'));
+}
+
+public function updateEkskul(Request $request, $id)
+{
+    $user = User::findOrFail($id);
+
+    // ambil input ekskul_id[] dari form (checklist)
+    $ekskulIds = $request->input('ekskul_id', []);
+
+    // sync -> supaya update many-to-many (hapus yang tidak dicentang, simpan yang dicentang)
+    $user->ekskul()->sync($ekskulIds);
+
+    return redirect()->route('kelola-user')->with('success', 'Ekskul pembina berhasil diperbarui!');
+}
+
 }

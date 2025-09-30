@@ -72,4 +72,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Ekskul::class)->withTimestamps();
     }
+
+    public function ekskul()
+{
+    return $this->belongsToMany(Ekskul::class, 'pembina_ekskul', 'user_id', 'ekskul_id');
+}
+
+
 }

@@ -50,8 +50,13 @@ Route::get('/ekskul/{ekskul}', [EkskulController::class, 'show'])->name('ekskul.
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // User Role Management (hanya untuk admin)
-    Route::get('/kelola-user', [UserRoleController::class, 'index'])->name('kelola-user');
+        // User Role Management (hanya untuk admin)
+        Route::get('/kelola-user', [UserRoleController::class, 'index'])->name('kelola-user');
+        Route::put('/user/{id}', [UserRoleController::class, 'update'])->name('user.update');
+        Route::get('/user/{id}', [UserRoleController::class, 'editEkskul'])->name('user.editEkskul');
+        Route::post('/user/{id}', [UserRoleController::class, 'updateEkskul'])->name('user.updateEkskul');
+        Route::delete('/user/{id}', [UserRoleController::class, 'destroy'])->name('user.destroy');
+
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
