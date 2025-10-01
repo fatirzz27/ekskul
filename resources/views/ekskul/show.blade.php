@@ -16,6 +16,26 @@
     @endauth
   </div>
 
+    <!-- 🔥 Tombol tambahan untuk pembina -->
+    @auth
+      @if(Auth::user()->role === 'pembina')
+        <div class="d-flex gap-2 mb-4">
+          <a href="{{ route('pembina.absensi.index', $ekskul->id) }}" class="btn btn-primary">
+            <i class="bi bi-check2-square"></i> Absensi
+          </a>
+          <a href="#" class="btn btn-primary">
+            <i class="bi bi-journal-text"></i> Laporan Absensi
+          </a>
+          <a href="{{ route('pembina.anggota.index', $ekskul->id) }}" class="btn btn-primary">
+  <i class="bi bi-people"></i> Kelola Anggota
+</a>
+
+
+        </div>
+      @endif
+    @endauth
+    <!-- 🔥 end tombol -->
+
   <!-- Hero Image -->
   <div class="ratio ratio-21x9 mb-4 rounded border border-primary overflow-hidden">
     <img src="{{ $ekskul->foto_url }}" alt="{{ $ekskul->nama_ekskul }}" class="w-100 h-100" style="object-fit:cover;">
@@ -29,6 +49,8 @@
         {{ $ekskul->deskripsi ?? 'Belum ada deskripsi untuk ekskul ini.' }}
       </p>
     </div>
+
+  
 
     <!-- Anggota Ekskul -->
     <div class="mb-5">
