@@ -6,6 +6,8 @@ use App\Http\Controllers\EkskulController;
 use App\Models\Ekskul;
 use App\Http\Controllers\UserRoleController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PembinaAnggotaController;
+use App\Http\Controllers\PembinaAbsensiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +66,21 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::prefix('pembina')->name('pembina.')->middleware(['auth'])->group(function () {
+    // tampil anggota ekskul
+    Route::get('/ekskul/{ekskul}/anggota', [PembinaAnggotaController::class, 'index'])->name('anggota.index');
+
+    // hapus anggota
+    Route::delete('/ekskul/{ekskul}/anggota/{userId}', [PembinaAnggotaController::class, 'destroy'])->name('anggota.destroy');
+
+    Route::get('ekskul/{ekskul}/absensi', [PembinaAbsensiController::class, 'index'])->name('absensi.index');
+Route::post('ekskul/{ekskul}/absensi', [PembinaAbsensiController::class, 'store'])->name('absensi.store');
+
+});
+
+
+
 
 
 require __DIR__.'/auth.php';

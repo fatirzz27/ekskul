@@ -18,14 +18,16 @@
     </div>
   @endif
 
-  <!-- Create New Button - Hanya untuk admin/pembina yang login -->
-  @auth
-    @if(in_array(auth()->user()->role, ['admin','pembina']))
-      <div class="mb-4">
-        <a href="{{ route('ekskul.create') }}" class="btn btn-primary">CREATE NEW</a>
-      </div>
-    @endif
-  @endauth
+  <!-- Create New Button -->
+ <!-- Create New Button -->
+@auth
+  @if(auth()->user()->role === 'admin')
+    <div class="mb-4">
+      <a href="{{ route('ekskul.create') }}" class="btn btn-primary">CREATE NEW</a>
+    </div>
+  @endif
+@endauth
+
 
   <!-- Card Row -->
   <div class="row g-4">
