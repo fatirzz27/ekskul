@@ -93,7 +93,7 @@
                   <div class="col-md-9">
                     <div class="d-flex gap-3">
                       <button type="submit" class="btn btn-success px-5">Update</button>
-                      <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-secondary px-5">Cancel</a>
+                      <a href="{{ route('ekskul.index', $ekskul) }}" class="btn btn-secondary px-5">Cancel</a>
                     </div>
                   </div>
                 </div>
