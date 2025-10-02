@@ -24,7 +24,7 @@ class UserRoleController extends Controller
         });
     }
 
-    $users = $query->get();
+    $users = $query->paginate(5);
 
     return view('KelolaUser.tampil', compact('users'));
 }

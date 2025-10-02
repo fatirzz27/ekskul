@@ -10,7 +10,7 @@
            value="{{ request('search') }}">
     <button type="submit" class="btn btn-primary">Search</button>
   </form>
-  <table class="table table-bordered table-striped">f
+  <table class="table table-bordered table-striped">
     <thead class="table-dark">
       <tr>
         <th scope="col">Users</th>
@@ -52,8 +52,14 @@
           </td>
         </tr>
         @endif
+        
       @endforeach
     </tbody>
   </table>
 </div>
+<div class="d-flex justify-content-center mt-3">
+    {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
+</div>
+
+
 @endsection

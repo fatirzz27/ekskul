@@ -25,7 +25,7 @@ class PembinaAnggotaController extends Controller
     {
         $user = Auth::user();
 
-        abort_if($ekskul->pembina_id !== $user->id, 403, 'Unauthorized');
+        abort_unless($ekskul->pembina->contains(Auth::id()), 403, 'Unauthorized');
 
         $ekskul->anggota()->detach($userId);
 
