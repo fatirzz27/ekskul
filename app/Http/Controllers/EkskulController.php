@@ -27,13 +27,6 @@ class EkskulController extends Controller
         return view('ekskul.index', compact('ekskuls'));
     }
 
-    public function manage()
-    {
-        $this->authorizeEditor();
-        $ekskuls = Ekskul::latest()->paginate(9);
-        return view('ekskul.manage', compact('ekskuls'));
-    }
-
     public function create()
     {
         $this->authorizeEditor();
@@ -69,7 +62,7 @@ class EkskulController extends Controller
     public function show(Ekskul $ekskul)
     {
       
-        $ekskul->load('anggota');
+        $ekskul->load('anggota.profile');
         $isMember = auth()->check() ? $ekskul->anggota->contains(auth()->id()) : false;
         return view('ekskul.show', compact('ekskul','isMember'));
     }

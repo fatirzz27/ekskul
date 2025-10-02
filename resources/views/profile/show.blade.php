@@ -32,7 +32,11 @@
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Gender</label>
-                        <input type="text" class="form-control" value="{{ $user->profile->jenis_kelamin ?? '' }}" readonly>
+                        <input type="text" class="form-control" value="{{ 
+                            $user->profile && $user->profile->jenis_kelamin == 'L' ? 'Laki-laki' : 
+                            ($user->profile && $user->profile->jenis_kelamin == 'P' ? 'Perempuan' : 
+                            ($user->profile->jenis_kelamin ?? ''))
+                        }}" readonly>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold">Nomor HP</label>

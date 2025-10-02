@@ -6,7 +6,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0 fw-bold">{{ $ekskul->nama_ekskul }}</h3>
     @auth
-      <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm">
         &larr; Kembali
       </a>
     @else
@@ -76,7 +76,15 @@
             <li class="d-flex align-items-center mb-2">
               <span class="d-inline-block bg-dark rounded-circle me-2" style="width:14px; height:14px;"></span>
               <span class="text-capitalize">{{ $anggota->name }}</span>
-              <span class="badge bg-light text-dark ms-2 small">{{ $anggota->jenis_kelamin ?? 'N/A' }}</span>
+              <span class="badge bg-light text-dark ms-2 small">
+                @if($anggota->profile && $anggota->profile->jenis_kelamin == 'L')
+                  Laki-laki
+                @elseif($anggota->profile && $anggota->profile->jenis_kelamin == 'P')
+                  Perempuan
+                @else
+                  N/A
+                @endif
+              </span>
             </li>
           @endforeach
         </ul>
