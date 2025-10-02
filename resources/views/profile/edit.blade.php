@@ -23,6 +23,7 @@
                             class="rounded-circle mb-2"
                             width="100"
                             height="100"
+                            style="object-fit: cover;"
                             alt="User Avatar">
 
                     </div>

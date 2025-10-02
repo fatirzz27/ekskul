@@ -19,7 +19,7 @@
         <div class="container">
             {{-- Logo --}}
             <a class="navbar-brand d-flex align-items-center fw-bold">
-                <img src="{{ asset('images/logo_fatahillah.jpg') }}" alt="Logo" width="35" class="me-2 rounded-circle">
+                <img src="{{ asset('images/logo_fatahillah.jpg') }}" alt="Logo" width="35" height="35" style="object-fit: cover;" class="me-2 rounded-circle">
                 {{ config('app.name', 'EkskulApp') }}
             </a>
 
@@ -39,9 +39,8 @@
                             
                         @elseif(Auth::user()->role === 'pembina')
                             <li class="nav-item"><a class="nav-link" href="{{route('dashboard')}}">Daftar Ekskul</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{route('pengumuman.index')}}">Pengumuman</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{route('ekskul.index')}}">Kelola Ekskul</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{{route('kelola-pengumuman.manage')}}">Kelola Pengumuman</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Pengumuman</a></li>
+                            <li class="nav-item"><a class="nav-link" href="#">Kelola Pengumuman</a></li>
                         @elseif(Auth::user()->role === 'siswa')
                             <li class="nav-item"><a class="nav-link" href="{{route('dashboard')}}">Daftar Ekskul</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{route('pengumuman.index')}}">Pengumuman</a></li>
@@ -72,7 +71,7 @@
                     </a>
                 </span>
                <img src="{{ asset('images/profile/' . (Auth::user()->profile->foto ?? 'default.jpg')) }}"
-                    class="rounded-circle me-2" width="45" alt="User Avatar">
+                    class="rounded-circle me-2" width="45" height="45" style="object-fit: cover;" alt="User Avatar">
    
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

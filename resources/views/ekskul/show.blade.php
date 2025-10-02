@@ -6,7 +6,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h3 class="mb-0 fw-bold">{{ $ekskul->nama_ekskul }}</h3>
     @auth
-      <a href="{{ route('ekskul.index') }}" class="btn btn-outline-secondary btn-sm">
+      <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm">
         &larr; Kembali
       </a>
     @else
@@ -16,7 +16,6 @@
     @endauth
   </div>
 
-    <!-- 🔥 Tombol tambahan untuk pembina -->
     @auth
       @if(Auth::user()->role === 'pembina')
         <div class="d-flex gap-2 mb-4">
@@ -34,9 +33,6 @@
         </div>
       @endif
     @endauth
-    <!-- 🔥 end tombol -->
-
-  <!-- Hero Image -->
   <div class="ratio ratio-21x9 mb-4 rounded border border-primary overflow-hidden">
     <img src="{{ $ekskul->foto_url }}" alt="{{ $ekskul->nama_ekskul }}" class="w-100 h-100" style="object-fit:cover;">
   </div>

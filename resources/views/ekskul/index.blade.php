@@ -68,7 +68,7 @@
                     </form>
                   @endif
                 </div>
-              @elseif($isPembina || $isAdmin)
+              @elseif(Auth::user()->role === 'pembina' || Auth::user()->role === 'admin')
                 <div class="d-flex">
                   <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning flex-fill rounded-0">
                     <i class="bi bi-pencil"></i>
@@ -133,7 +133,6 @@
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
-  <!-- Custom Modal Styles -->
   <style>
     /* Custom Modal Styles */
     .modal-content {

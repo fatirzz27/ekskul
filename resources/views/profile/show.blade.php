@@ -7,7 +7,7 @@
             <!-- Bagian Header Profile -->
             <div class="d-flex align-items-center mb-4">
                 <img src="{{ asset('images/profile/' . ($user->profile->foto ?? 'default.jpg')) }}" 
-                class="rounded-circle" width="100" alt="User Avatar">
+                class="rounded-circle me-3" width="100" height="100" style="object-fit: cover;" alt="User Avatar">
 
                 <div>
                     <h5 class="mb-0">{{ $user->name ?? '' }}</h5>
