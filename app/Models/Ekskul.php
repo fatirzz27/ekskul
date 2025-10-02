@@ -30,10 +30,11 @@ class Ekskul extends Model
 
 
 
-    public function pembina()
-{
-    return $this->belongsToMany(User::class, 'pembina_id', 'ekskul_id', 'user_id');
 
+
+public function pembina()
+{
+    return $this->belongsToMany(User::class, 'pembina_ekskul', 'ekskul_id', 'user_id');
 }
 
     public function pengumumans()

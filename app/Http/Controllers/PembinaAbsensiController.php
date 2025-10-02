@@ -12,7 +12,7 @@ class PembinaAbsensiController extends Controller
     public function index(Ekskul $ekskul)
     {
         // cek apakah user pembina ekskul
-        abort_if($ekskul->pembina_id !== Auth::id(), 403, 'Unauthorized');
+        abort_unless($ekskul->pembina->contains(Auth::id()), 403, 'Unauthorized');
 
         $anggota = $ekskul->anggota; // semua siswa di ekskul
         return view('pembina.absensi.index', compact('ekskul', 'anggota'));
