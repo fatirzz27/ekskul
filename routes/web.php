@@ -26,6 +26,7 @@ Route::get('/', function () {
 
 // PUBLIC (guest bisa lihat daftar & detail)
 Route::get('/ekskul', [EkskulController::class, 'index'])->name('ekskul.index');
+Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('pengumuman.index');
 
 // MANAGEMENT (harus login & role admin/pembina)
 Route::middleware('auth')->group(function () {
@@ -83,7 +84,7 @@ Route::post('ekskul/{ekskul}/absensi', [PembinaAbsensiController::class, 'store'
 
 // pengumuman
 // Untuk umum/siswa
-Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('pengumuman.index');
+
 
 
 // Untuk admin & pembina
