@@ -35,67 +35,36 @@
       <div class="col-md-4">
         <div class="card shadow-sm h-100 d-flex flex-column">
           <img src="{{ $ekskul->foto_url }}" class="card-img-top" alt="{{ $ekskul->nama_ekskul }}" style="height: 200px; object-fit: cover;">
-          <div class="card-body pb-0">
+          <div class="card-body">
             <h5 class="card-title fw-bold">{{ $ekskul->nama_ekskul }}</h5>
-            <p class="card-text text-secondary" style="min-height: 70px;">{{ Str::limit($ekskul->deskripsi ?? 'Tidak ada deskripsi', 100, '...') }}</p>
+            <p class="card-text text-secondary">{{ Str::limit($ekskul->deskripsi ?? 'Tidak ada deskripsi', 100, '...') }}</p>
             <small class="text-muted">
               <i class="bi bi-people"></i> {{ $ekskul->anggota->count() }} anggota
             </small>
-          </div>
-
-          @auth
-            @php
-              $isSiswa = auth()->user()->role === 'siswa';
-              $isMember = $ekskul->anggota->contains(auth()->id());
-              $isEditor = in_array(auth()->user()->role, ['admin','pembina']);
-            @endphp
             
-            @if($isSiswa)
-              @if(!$isMember)
-                <!-- READ MORE Button -->
-                <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-primary rounded-0 rounded-top-0 d-block py-2 fw-semibold">READ MORE</a>
-                
-                <!-- JOIN Button -->
-                <form action="{{ route('ekskul.join', $ekskul) }}" method="POST" class="w-100">
-                  @csrf
-                  <button type="submit" class="btn btn-success rounded-0 d-block w-100 py-2 fw-semibold">
-                    <i class="bi bi-plus-circle me-2"></i>JOIN
-                  </button>
-                </form>
-              @else
-                <!-- READ MORE Button -->
-                <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-primary rounded-0 rounded-top-0 d-block py-2 fw-semibold">READ MORE</a>
-                
-                <!-- LEAVE Button -->
-                <form action="{{ route('ekskul.leave', $ekskul) }}" method="POST" class="w-100">
-                  @csrf
-                  @method('DELETE')
-                  <button type="submit" class="btn btn-danger rounded-0 d-block w-100 py-2 fw-semibold">
-                    <i class="bi bi-x-circle me-2"></i>LEAVE
-                  </button>
-                </form>
-              @endif
-            @elseif($isEditor)
-              <!-- READ MORE Button -->
-              <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-primary rounded-0 rounded-top-0 d-block py-2 fw-semibold">READ MORE</a>
+            <div class="mt-3">
+              <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-primary btn-sm">
+                Lihat Detail
+              </a>
               
-              <!-- Action Buttons Row -->
-              <div class="d-flex w-100">
-                <!-- Delete Button (Red) -->
-                <button type="button" class="btn btn-danger flex-fill rounded-0" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $ekskul->id }}" title="Hapus">
-                  <i class="bi bi-trash"></i>
-                </button>
+              @auth
+                @php
+                  $isEditor = in_array(auth()->user()->role, ['admin','pembina']);
+                @endphp
                 
-                <!-- Edit Button (Yellow) -->
-                <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning flex-fill rounded-0" title="Edit">
-                  <i class="bi bi-pencil-square"></i>
-                </a>
-              </div>
-            @endif
-          @else
-            <!-- READ MORE Button for guests -->
-            <a href="{{ route('ekskul.show', $ekskul) }}" class="btn btn-primary rounded-0 rounded-top-0 d-block py-2 fw-semibold">READ MORE</a>
-          @endauth
+                @if($isEditor)
+                  <!-- Action Buttons -->
+                  <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $ekskul->id }}" title="Hapus">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                  
+                  <a href="{{ route('ekskul.edit', $ekskul) }}" class="btn btn-warning btn-sm" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                  </a>
+                @endif
+              @endauth
+            </div>
+          </div>
         </div>
       </div>
     @empty

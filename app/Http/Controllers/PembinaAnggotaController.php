@@ -14,7 +14,7 @@ class PembinaAnggotaController extends Controller
         abort_unless($ekskul->pembina->contains(Auth::id()), 403, 'Unauthorized');
     
         // load profile juga
-        $anggota = $ekskul->anggota()->with('profile')->get();
+        $anggota = $ekskul->anggota()->with('profile')->paginate(1);
     
         return view('pembina.anggota.index', compact('ekskul', 'anggota'));
     }

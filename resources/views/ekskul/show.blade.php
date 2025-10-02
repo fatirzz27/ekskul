@@ -71,7 +71,7 @@
         @endauth
       </div>
       @if($ekskul->anggota->count())
-        <ul class="list-unstyled m-0" style="column-width: 260px; column-gap: 40px;">
+        <ul class="list-unstyled m-0">
           @foreach($ekskul->anggota as $anggota)
             <li class="d-flex align-items-center mb-2">
               <span class="d-inline-block bg-dark rounded-circle me-2" style="width:14px; height:14px;"></span>
