@@ -11,11 +11,24 @@ class UserRoleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $users = User::all(); // fetch all users
-        return view('KelolaUser.tampil', compact('users'));
+    public function index(Request $request)
+{
+    $query = User::query();
+
+    // kalau ada input pencarian
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
+        });
     }
+
+    $users = $query->get();
+
+    return view('KelolaUser.tampil', compact('users'));
+}
+
 
     /**
      * Update the specified user's role.

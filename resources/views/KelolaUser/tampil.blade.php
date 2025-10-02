@@ -1,9 +1,16 @@
 @extends('layouts.master')
 
 @section('content')
+
 <div class="container mt-4">
   <h3 class="mb-3">Kelola Users</h3>
-  <table class="table table-bordered table-striped">
+  <form action="{{ route('kelola-user') }}" method="GET" class="mb-3 d-flex" role="search">
+    <input type="text" name="search" class="form-control me-2" 
+           placeholder="Cari nama atau email..."
+           value="{{ request('search') }}">
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+  <table class="table table-bordered table-striped">f
     <thead class="table-dark">
       <tr>
         <th scope="col">Users</th>
