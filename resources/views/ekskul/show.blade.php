@@ -17,7 +17,7 @@
   </div>
 
     @auth
-      @if(Auth::user()->role === 'pembina')
+      @if($ekskul->pembina->contains(Auth::id()))
         <div class="d-flex gap-2 mb-4">
           <a href="{{ route('pembina.absensi.index', $ekskul->id) }}" class="btn btn-primary">
             <i class="bi bi-check2-square"></i> Absensi

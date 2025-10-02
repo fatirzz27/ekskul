@@ -61,8 +61,8 @@ class EkskulController extends Controller
 
     public function show(Ekskul $ekskul)
     {
-      
-        $ekskul->load('anggota.profile');
+        
+        $ekskul->load(['anggota', 'pembina']);
         $isMember = auth()->check() ? $ekskul->anggota->contains(auth()->id()) : false;
         return view('ekskul.show', compact('ekskul','isMember'));
     }
