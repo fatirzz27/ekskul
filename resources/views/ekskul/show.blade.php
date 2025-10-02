@@ -22,7 +22,7 @@
           <a href="{{ route('pembina.absensi.index', $ekskul->id) }}" class="btn btn-primary">
             <i class="bi bi-check2-square"></i> Absensi
           </a>
-          <a href="#" class="btn btn-primary">
+          <a href="{{ route('pembina.laporan.index', $ekskul->id) }}" class="btn btn-primary">
             <i class="bi bi-journal-text"></i> Laporan Absensi
           </a>
           <a href="{{ route('pembina.anggota.index', $ekskul->id) }}" class="btn btn-primary">

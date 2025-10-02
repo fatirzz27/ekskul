@@ -9,6 +9,7 @@ use App\Http\Controllers\UserRoleController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PembinaAnggotaController;
 use App\Http\Controllers\PembinaAbsensiController;
+use App\Http\Controllers\LaporanAbsensiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -97,6 +98,11 @@ Route::delete('/kelola-pengumuman/{pengumuman}', [PengumumanController::class, '
 
 Route::resource('kelola-pengumuman', PengumumanController::class);
 Route::resource('pengumuman', PengumumanController::class)->only(['index','show']);
+
+Route::prefix('pembina')->name('pembina.')->middleware('auth')->group(function () {
+    Route::get('/{ekskul}/laporan-absensi', [LaporanAbsensiController::class, 'index'])
+        ->name('laporan.index');
+});
 
 require __DIR__.'/auth.php';
 

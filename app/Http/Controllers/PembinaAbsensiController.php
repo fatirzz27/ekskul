@@ -47,4 +47,6 @@ class PembinaAbsensiController extends Controller
         return redirect()->route('pembina.absensi.index', $ekskul)
                          ->with('success', 'Absensi berhasil disimpan.');
     }
+
+    
 }
