@@ -9,6 +9,11 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ $ekskul->nama }}</h5>
                         <p class="card-text">{{ Str::limit($ekskul->deskripsi ?? 'Tidak ada deskripsi', 100, '...') }}</p>
+                        <div>
+                                <small class="text-muted">
+                                     <i class="bi bi-people"></i> {{ $ekskul->anggota->count() }} anggota
+                                </small>
+                        </div>
                         <a href="{{ route('ekskul.show', $ekskul->id) }}" class="btn btn-primary">Lihat Detail</a>
                     </div>
                 </div>
