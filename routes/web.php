@@ -73,7 +73,6 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('pembina')->name('pembina.')->middleware(['auth'])->group(function () {
     // tampil anggota ekskul
     Route::get('/ekskul/{ekskul}/anggota', [PembinaAnggotaController::class, 'index'])->name('anggota.index');
-
     // hapus anggota
     Route::delete('/ekskul/{ekskul}/anggota/{userId}', [PembinaAnggotaController::class, 'destroy'])->name('anggota.destroy');
 
@@ -96,7 +95,7 @@ Route::get('/kelola-pengumuman/{pengumuman}/edit', [PengumumanController::class,
 Route::put('/kelola-pengumuman/{pengumuman}', [PengumumanController::class, 'update'])->name('kelola-pengumuman.update');
 Route::delete('/kelola-pengumuman/{pengumuman}', [PengumumanController::class, 'destroy'])->name('kelola-pengumuman.destroy');
 
-Route::resource('kelola-pengumuman', PengumumanController::class);
+// Route::resource('kelola-pengumuman', PengumumanController::class);
 Route::resource('pengumuman', PengumumanController::class)->only(['index','show']);
 
 Route::prefix('pembina')->name('pembina.')->middleware('auth')->group(function () {
