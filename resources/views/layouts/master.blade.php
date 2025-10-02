@@ -42,14 +42,14 @@
                             <li class="nav-item"><a class="nav-link" href="{{route('pengumuman.index')}}">Pengumuman</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{route('kelola-pengumuman.manage')}}">Kelola Pengumuman</a></li>
                         @elseif(Auth::user()->role === 'siswa')
-                            <li class="nav-item"><a class="nav-link" href="{{route('dashboard')}}">Daftar Ekskul</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{route('ekskul.index')}}">Daftar Ekskul</a></li>
                             <li class="nav-item"><a class="nav-link" href="{{route('pengumuman.index')}}">Pengumuman</a></li>
                         @endif
                     @endauth
 
                     @guest
                         <li class="nav-item"><a class="nav-link" href="{{route('pengumuman.index')}}">Pengumuman</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{route('dashboard')}}">Daftar Ekskul</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{route('ekskul.index')}}">Daftar Ekskul</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{route('login')}}">Login</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{route('register')}}">Register</a></li>
                     @endguest
