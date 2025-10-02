@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EkskulController;
 use App\Models\Ekskul;
@@ -80,8 +81,21 @@ Route::post('ekskul/{ekskul}/absensi', [PembinaAbsensiController::class, 'store'
 });
 
 
+// pengumuman
+// Untuk umum/siswa
+Route::get('/pengumuman', [PengumumanController::class, 'index'])->name('pengumuman.index');
 
 
+// Untuk admin & pembina
+Route::get('/kelola-pengumuman/manage', [PengumumanController::class, 'manage'])->name('kelola-pengumuman.manage');
+Route::get('/kelola-pengumuman/create', [PengumumanController::class, 'create'])->name('kelola-pengumuman.create');
+Route::post('/kelola-pengumuman', [PengumumanController::class, 'store'])->name('kelola-pengumuman.store');
+Route::get('/kelola-pengumuman/{pengumuman}/edit', [PengumumanController::class, 'edit'])->name('kelola-pengumuman.edit');
+Route::put('/kelola-pengumuman/{pengumuman}', [PengumumanController::class, 'update'])->name('kelola-pengumuman.update');
+Route::delete('/kelola-pengumuman/{pengumuman}', [PengumumanController::class, 'destroy'])->name('kelola-pengumuman.destroy');
+
+Route::resource('kelola-pengumuman', PengumumanController::class);
+Route::resource('pengumuman', PengumumanController::class)->only(['index','show']);
 
 require __DIR__.'/auth.php';
 
