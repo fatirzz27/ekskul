@@ -5,13 +5,6 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <h2 class="text-dark">Laporan Absensi - {{ $ekskul->nama_ekskul }}</h2>
-            <p class="text-muted">Kelola dan export laporan absensi ekstrakurikuler</p>
-            @if(isset($pagination) && !$tanggal)
-                <small class="text-info">
-                    <i class="bi bi-info-circle"></i> 
-                    Menampilkan {{ $pagination['per_page'] }} laporan per halaman
-                </small>
-            @endif
         </div>
     </div>
 
