@@ -21,7 +21,7 @@ use App\Http\Controllers\LaporanAbsensiController;
 */
 
 Route::get('/', function () {
-    $ekskuls = Ekskul::latest()->take(3)->get(); // Ambil 3 ekskul terbaru untuk welcome page
+    $ekskuls = Ekskul::latest()->get(); // Ambil 3 ekskul terbaru untuk welcome page
     return view('welcome', compact('ekskuls'));
 });
 
