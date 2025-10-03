@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\LaporanAbsensi;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
@@ -39,14 +40,35 @@ class AbsensiExport implements
         $this->ekskulId = $ekskulId;
         $this->tanggal = $tanggal;
         
-        // Load data
-        $this->data = LaporanAbsensi::where('ekskul_id', $ekskulId)
-            ->whereDate('tanggal', $tanggal)
-            ->with(['user', 'ekskul'])
-            ->orderBy('user_id')
-            ->get();
+        try {
+            // Load data
+            $this->data = LaporanAbsensi::where('ekskul_id', $ekskulId)
+                ->whereDate('tanggal', $tanggal)
+                ->with(['user', 'ekskul'])
+                ->orderBy('user_id')
+                ->get();
+                
+            $this->ekskulName = $this->data->first()?->ekskul?->nama_ekskul ?? 'Unknown';
             
-        $this->ekskulName = $this->data->first()?->ekskul?->nama_ekskul ?? 'Unknown';
+            // Log untuk debugging
+            Log::info('AbsensiExport initialized', [
+                'ekskul_id' => $ekskulId,
+                'tanggal' => $tanggal,
+                'data_count' => $this->data->count(),
+                'ekskul_name' => $this->ekskulName
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('AbsensiExport initialization failed', [
+                'error' => $e->getMessage(),
+                'ekskul_id' => $ekskulId,
+                'tanggal' => $tanggal
+            ]);
+            
+            // Fallback data kosong
+            $this->data = collect();
+            $this->ekskulName = 'Unknown';
+        }
     }
 
     public function collection()

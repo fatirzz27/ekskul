@@ -9,6 +9,7 @@ use App\Exports\AbsensiExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LaporanAbsensiController extends Controller
 {
@@ -65,36 +66,75 @@ class LaporanAbsensiController extends Controller
 
     public function export(Ekskul $ekskul, Request $request)
     {
-        // Pastikan hanya pembina ekskul terkait yang bisa akses
-        abort_unless($ekskul->pembina->contains(Auth::id()), 403);
+        try {
+            // Pastikan hanya pembina ekskul terkait yang bisa akses
+            abort_unless($ekskul->pembina->contains(Auth::id()), 403);
 
-        $tanggal = $request->input('tanggal');
-        $format = $request->input('format', 'excel'); // default excel
-        
-        if (!$tanggal) {
-            return back()->withErrors(['tanggal' => 'Tanggal harus dipilih untuk export.']);
-        }
-
-        // Cek apakah ada data untuk tanggal tersebut
-        $count = LaporanAbsensi::where('ekskul_id', $ekskul->id)
-            ->whereDate('tanggal', $tanggal)
-            ->count();
+            $tanggal = $request->input('tanggal');
+            $format = $request->input('format', 'excel'); // default excel
             
-        if ($count == 0) {
-            return back()->withErrors(['tanggal' => 'Tidak ada data absensi untuk tanggal yang dipilih.']);
-        }
+            if (!$tanggal) {
+                return back()->withErrors(['tanggal' => 'Tanggal harus dipilih untuk export.']);
+            }
 
-        $export = new AbsensiExport($ekskul->id, $tanggal);
-        
-        // Generate filename
-        $ekskulName = str_replace(' ', '_', $ekskul->nama_ekskul);
-        $filename = 'laporan_absensi_' . $ekskulName . '_' . $tanggal;
-        
-        if ($format === 'csv') {
-            return Excel::download($export, $filename . '.csv', \Maatwebsite\Excel\Excel::CSV);
+            // Cek apakah ada data untuk tanggal tersebut
+            $count = LaporanAbsensi::where('ekskul_id', $ekskul->id)
+                ->whereDate('tanggal', $tanggal)
+                ->count();
+                
+            if ($count == 0) {
+                return back()->withErrors(['tanggal' => 'Tidak ada data absensi untuk tanggal yang dipilih.']);
+            }
+
+            // Log untuk debugging di production
+            Log::info('Export attempt', [
+                'ekskul_id' => $ekskul->id,
+                'tanggal' => $tanggal,
+                'format' => $format,
+                'data_count' => $count,
+                'temp_dir' => sys_get_temp_dir(),
+                'memory_limit' => ini_get('memory_limit'),
+                'max_execution_time' => ini_get('max_execution_time')
+            ]);
+
+            // Increase memory limit for production
+            ini_set('memory_limit', '256M');
+            ini_set('max_execution_time', 300); // 5 minutes
+
+            $export = new AbsensiExport($ekskul->id, $tanggal);
+            
+            // Generate filename - sanitize untuk production
+            $ekskulName = str_replace([' ', '/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $ekskul->nama_ekskul);
+            $filename = 'laporan_absensi_' . $ekskulName . '_' . $tanggal;
+            
+            // Clear any output buffer
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
+            
+            if ($format === 'csv') {
+                Log::info('Exporting CSV', ['filename' => $filename . '.csv']);
+                return Excel::download($export, $filename . '.csv', \Maatwebsite\Excel\Excel::CSV, [
+                    'Content-Type' => 'text/csv',
+                ]);
+            }
+            
+            // Default Excel format (.xlsx) - menggunakan maatwebsite/excel yang benar
+            Log::info('Exporting Excel', ['filename' => $filename . '.xlsx']);
+            return Excel::download($export, $filename . '.xlsx', \Maatwebsite\Excel\Excel::XLSX, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Export failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'ekskul_id' => $ekskul->id ?? null,
+                'tanggal' => $tanggal ?? null,
+                'format' => $format ?? null
+            ]);
+
+            return back()->withErrors(['export' => 'Terjadi kesalahan saat export. Silakan coba lagi. Error: ' . $e->getMessage()]);
         }
-        
-        // Default Excel format (.xlsx) - menggunakan maatwebsite/excel yang benar
-        return Excel::download($export, $filename . '.xlsx');
     }
 }
