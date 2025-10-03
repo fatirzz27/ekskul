@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Ekskul;
 use App\Models\LaporanAbsensi;
 use App\Exports\AbsensiExport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -85,10 +86,15 @@ class LaporanAbsensiController extends Controller
 
         $export = new AbsensiExport($ekskul->id, $tanggal);
         
+        // Generate filename
+        $ekskulName = str_replace(' ', '_', $ekskul->nama_ekskul);
+        $filename = 'laporan_absensi_' . $ekskulName . '_' . $tanggal;
+        
         if ($format === 'csv') {
-            return $export->generateCsv();
+            return Excel::download($export, $filename . '.csv', \Maatwebsite\Excel\Excel::CSV);
         }
         
-        return $export->generateExcel(); // Default to Excel format
+        // Default Excel format (.xlsx) - menggunakan maatwebsite/excel yang benar
+        return Excel::download($export, $filename . '.xlsx');
     }
 }

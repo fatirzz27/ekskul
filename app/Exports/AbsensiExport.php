@@ -4,28 +4,207 @@ namespace App\Exports;
 
 use App\Models\LaporanAbsensi;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithCustomStartCell;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
-class AbsensiExport
+class AbsensiExport implements 
+    FromCollection, 
+    WithHeadings, 
+    WithMapping, 
+    WithTitle,
+    WithStyles,
+    WithColumnWidths,
+    WithCustomStartCell,
+    WithEvents
 {
     protected $ekskulId;
     protected $tanggal;
+    protected $ekskulName;
+    protected $data;
 
     public function __construct($ekskulId, $tanggal)
     {
         $this->ekskulId = $ekskulId;
         $this->tanggal = $tanggal;
-    }
-
-    public function generateCsv()
-    {
-        $data = LaporanAbsensi::where('ekskul_id', $this->ekskulId)
-            ->whereDate('tanggal', $this->tanggal)
+        
+        // Load data
+        $this->data = LaporanAbsensi::where('ekskul_id', $ekskulId)
+            ->whereDate('tanggal', $tanggal)
             ->with(['user', 'ekskul'])
             ->orderBy('user_id')
             ->get();
+            
+        $this->ekskulName = $this->data->first()?->ekskul?->nama_ekskul ?? 'Unknown';
+    }
 
-        $ekskul = $data->first()->ekskul ?? null;
-        $ekskulName = $ekskul ? $ekskul->nama_ekskul : 'Unknown';
+    public function collection()
+    {
+        return $this->data;
+    }
+
+    public function map($row): array
+    {
+        static $no = 1;
+        
+        return [
+            $no++,
+            $row->user->name,
+            ucfirst($row->status),
+            $row->keterangan ?? '-'
+        ];
+    }
+
+    public function headings(): array
+    {
+        return [
+            'No',
+            'Nama Siswa',
+            'Status Kehadiran',
+            'Keterangan'
+        ];
+    }
+
+    public function title(): string
+    {
+        return 'Laporan Absensi';
+    }
+
+    public function startCell(): string
+    {
+        return 'A6'; // Start data dari baris 6
+    }
+
+    public function columnWidths(): array
+    {
+        return [
+            'A' => 5,   // No
+            'B' => 25,  // Nama Siswa
+            'C' => 15,  // Status
+            'D' => 30,  // Keterangan
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        return [
+            // Style untuk header data
+            6 => [
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'color' => ['rgb' => '4472C4']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+            ],
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                
+                // Title dan info di bagian atas
+                $sheet->setCellValue('A1', 'LAPORAN ABSENSI EKSTRAKURIKULER');
+                $sheet->setCellValue('A2', 'Ekstrakurikuler: ' . $this->ekskulName);
+                $sheet->setCellValue('A3', 'Tanggal: ' . Carbon::parse($this->tanggal)->format('d F Y'));
+                $sheet->setCellValue('A4', 'Total Siswa: ' . $this->data->count());
+
+                // Style untuk title
+                $sheet->getStyle('A1')->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'size' => 16,
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    ],
+                ]);
+
+                // Merge title
+                $sheet->mergeCells('A1:D1');
+                
+                // Style untuk info
+                $sheet->getStyle('A2:A4')->applyFromArray([
+                    'font' => ['bold' => true],
+                ]);
+
+                // Hitung ringkasan
+                $hadir = $this->data->where('status', 'hadir')->count();
+                $izin = $this->data->where('status', 'izin')->count();
+                $alfa = $this->data->where('status', 'alfa')->count();
+
+                // Tambahkan ringkasan di bawah data
+                $lastRow = 6 + $this->data->count() + 2; // 6 (start) + data + 2 (spacing)
+                
+                $sheet->setCellValue('A' . $lastRow, 'RINGKASAN:');
+                $sheet->setCellValue('A' . ($lastRow + 1), 'Hadir:');
+                $sheet->setCellValue('B' . ($lastRow + 1), $hadir);
+                $sheet->setCellValue('A' . ($lastRow + 2), 'Izin:');
+                $sheet->setCellValue('B' . ($lastRow + 2), $izin);
+                $sheet->setCellValue('A' . ($lastRow + 3), 'Alfa:');
+                $sheet->setCellValue('B' . ($lastRow + 3), $alfa);
+                $sheet->setCellValue('A' . ($lastRow + 4), 'Total:');
+                $sheet->setCellValue('B' . ($lastRow + 4), $this->data->count());
+
+                // Style untuk ringkasan
+                $sheet->getStyle('A' . $lastRow . ':B' . ($lastRow + 4))->applyFromArray([
+                    'font' => ['bold' => true],
+                ]);
+
+                // Warna untuk status dalam data
+                $dataStartRow = 7; // Row setelah header
+                foreach ($this->data as $index => $row) {
+                    $currentRow = $dataStartRow + $index;
+                    $statusCell = 'C' . $currentRow;
+                    
+                    switch($row->status) {
+                        case 'hadir':
+                            $sheet->getStyle($statusCell)->applyFromArray([
+                                'font' => ['color' => ['rgb' => '008000'], 'bold' => true],
+                            ]);
+                            break;
+                        case 'izin':
+                            $sheet->getStyle($statusCell)->applyFromArray([
+                                'font' => ['color' => ['rgb' => 'FF8C00'], 'bold' => true],
+                            ]);
+                            break;
+                        case 'alfa':
+                            $sheet->getStyle($statusCell)->applyFromArray([
+                                'font' => ['color' => ['rgb' => 'FF0000'], 'bold' => true],
+                            ]);
+                            break;
+                    }
+                }
+
+                // Border untuk tabel data
+                $dataRange = 'A6:D' . (6 + $this->data->count());
+                $sheet->getStyle($dataRange)->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                        ],
+                    ],
+                ]);
+            },
+        ];
+    }
+
+    // Backup methods untuk compatibility dengan kode lama
+    public function generateCsv()
+    {
+        $data = $this->data;
+        $ekskulName = $this->ekskulName;
         
         $filename = 'laporan_absensi_' . str_replace(' ', '_', $ekskulName) . '_' . $this->tanggal . '.csv';
         
@@ -95,106 +274,15 @@ class AbsensiExport
 
     public function generateExcel()
     {
-        // Get data untuk tanggal tertentu
-        $data = LaporanAbsensi::where('ekskul_id', $this->ekskulId)
-            ->whereDate('tanggal', $this->tanggal)
-            ->with(['user', 'ekskul'])
-            ->orderBy('user_id')
-            ->get();
-
-        // Jika tidak ada data, buat file kosong dengan pesan
-        if ($data->isEmpty()) {
-            $ekskul = \App\Models\Ekskul::find($this->ekskulId);
-            $ekskulName = $ekskul ? $ekskul->nama_ekskul : 'Unknown';
-            
-            $filename = 'laporan_absensi_' . str_replace(' ', '_', $ekskulName) . '_' . $this->tanggal . '.xls';
-            
-            $headers = [
-                'Content-Type' => 'application/vnd.ms-excel',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma' => 'no-cache',
-                'Expires' => '0',
-            ];
-
-            $html = '<html><head><meta charset="UTF-8"></head><body>';
-            $html .= '<table border="1" cellpadding="5" cellspacing="0">';
-            $html .= '<tr><td colspan="4" style="text-align:center; font-weight:bold; font-size:16px;">LAPORAN ABSENSI EKSTRAKURIKULER</td></tr>';
-            $html .= '<tr><td><strong>Ekstrakurikuler:</strong></td><td colspan="3">' . htmlspecialchars($ekskulName) . '</td></tr>';
-            $html .= '<tr><td><strong>Tanggal:</strong></td><td colspan="3">' . Carbon::parse($this->tanggal)->format('d F Y') . '</td></tr>';
-            $html .= '<tr><td colspan="4" style="text-align:center; color:red;">Tidak ada data absensi untuk tanggal ini</td></tr>';
-            $html .= '</table></body></html>';
-
-            return response($html, 200, $headers);
-        }
-
-        $ekskul = $data->first()->ekskul;
-        $ekskulName = $ekskul->nama_ekskul;
-        
-        $filename = 'laporan_absensi_' . str_replace(' ', '_', $ekskulName) . '_' . $this->tanggal . '.xls';
-        
-        $headers = [
-            'Content-Type' => 'application/vnd.ms-excel',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => '0',
-        ];
-
-        $html = $this->generateHtmlTable($data, $ekskulName);
-
-        return response($html, 200, $headers);
+        // Fallback untuk compatibility - redirect ke method baru
+        return $this->generateModernExcel();
     }
 
-    private function generateHtmlTable($data, $ekskulName)
+    private function generateModernExcel()
     {
-        $hadir = $data->where('status', 'hadir')->count();
-        $izin = $data->where('status', 'izin')->count();
-        $alfa = $data->where('status', 'alfa')->count();
+        $ekskulName = str_replace(' ', '_', $this->ekskulName);
+        $filename = 'laporan_absensi_' . $ekskulName . '_' . $this->tanggal . '.xlsx';
         
-        $html = '<html><head><meta charset="UTF-8"></head><body>';
-        $html .= '<table border="1" cellpadding="5" cellspacing="0">';
-        
-        // Title and info
-        $html .= '<tr><td colspan="4" style="text-align:center; font-weight:bold; font-size:16px;">LAPORAN ABSENSI EKSTRAKURIKULER</td></tr>';
-        $html .= '<tr><td><strong>Ekstrakurikuler:</strong></td><td colspan="3">' . htmlspecialchars($ekskulName) . '</td></tr>';
-        $html .= '<tr><td><strong>Tanggal:</strong></td><td colspan="3">' . Carbon::parse($this->tanggal)->format('d F Y') . '</td></tr>';
-        $html .= '<tr><td><strong>Total Siswa:</strong></td><td colspan="3">' . count($data) . '</td></tr>';
-        $html .= '<tr><td colspan="4"></td></tr>'; // Empty row
-        
-        // Header
-        $html .= '<tr style="background-color: #4472C4; color: white; font-weight: bold;">';
-        $html .= '<td>No</td><td>Nama Siswa</td><td>Status Kehadiran</td><td>Keterangan</td>';
-        $html .= '</tr>';
-        
-        // Data rows
-        $no = 1;
-        foreach ($data as $row) {
-            $statusColor = '';
-            switch($row->status) {
-                case 'hadir': $statusColor = 'color: green; font-weight: bold;'; break;
-                case 'izin': $statusColor = 'color: orange; font-weight: bold;'; break;
-                case 'alfa': $statusColor = 'color: red; font-weight: bold;'; break;
-            }
-            
-            $html .= '<tr>';
-            $html .= '<td>' . $no++ . '</td>';
-            $html .= '<td>' . htmlspecialchars($row->user->name) . '</td>';
-            $html .= '<td style="' . $statusColor . '">' . ucfirst($row->status) . '</td>';
-            $html .= '<td>' . htmlspecialchars($row->keterangan ?? '-') . '</td>';
-            $html .= '</tr>';
-        }
-        
-        // Summary
-        $html .= '<tr><td colspan="4"></td></tr>'; // Empty row
-        $html .= '<tr><td colspan="4" style="font-weight:bold;">RINGKASAN:</td></tr>';
-        $html .= '<tr><td><strong>Hadir:</strong></td><td style="color: green; font-weight: bold;">' . $hadir . '</td><td></td><td></td></tr>';
-        $html .= '<tr><td><strong>Izin:</strong></td><td style="color: orange; font-weight: bold;">' . $izin . '</td><td></td><td></td></tr>';
-        $html .= '<tr><td><strong>Alfa:</strong></td><td style="color: red; font-weight: bold;">' . $alfa . '</td><td></td><td></td></tr>';
-        $html .= '<tr><td><strong>Total:</strong></td><td style="font-weight: bold;">' . count($data) . '</td><td></td><td></td></tr>';
-        
-        $html .= '</table></body></html>';
-        
-        return $html;
+        return \Maatwebsite\Excel\Facades\Excel::download($this, $filename);
     }
 }
