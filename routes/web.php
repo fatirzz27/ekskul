@@ -101,6 +101,8 @@ Route::resource('pengumuman', PengumumanController::class)->only(['index','show'
 Route::prefix('pembina')->name('pembina.')->middleware('auth')->group(function () {
     Route::get('/{ekskul}/laporan-absensi', [LaporanAbsensiController::class, 'index'])
         ->name('laporan.index');
+    Route::get('/{ekskul}/laporan-absensi/export', [LaporanAbsensiController::class, 'export'])
+        ->name('laporan.export');
 });
 
 require __DIR__.'/auth.php';
